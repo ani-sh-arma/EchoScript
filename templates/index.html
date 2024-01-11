@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}
+Transcribe Audio
+{% endblock title %}
+
+{% block style %}
+
+<link rel="stylesheet" href="/static/style.css">
+
+<style>
+    #drop-area {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        cursor: pointer;
+        height: 200px;
+        display: grid;
+        place-items: center;
+    }
+
+    #drop-area.highlight {
+        background-color: #f0f8ff; /* LightSkyBlue */
+    }
+</style>
+
+{% endblock style %}
+
+{% block action %}
+
+{% if request.user.is_anonymous %}
+<ul style="float: right;">
+    <a href="/login">Login</a>
+</ul>
+{% else %}
+<ul style="float: right;">
+    <a href="/logout">Logout</a>
+</ul>
+{% endif %}
+
+{% endblock action %}
+
+{% block main %}
+<!-- <header style="height: fit-content;"> -->
+
+<div id="wrapper">
+<!-- </header> -->
+
+<h1 style="margin-bottom: 50px; display: grid; place-items: center;">Upload an audio file to transcribe.</h1>
+
+<form action="/transcribe/" method="post" enctype="multipart/form-data" id="upload-form">
+
+    {% csrf_token %}
+
+    <div id="drop-area" class="highlight">
+        <label id="file-label" for="file-input">Select or Drag and Drop File</label>
+        <input type="file" id="file-input" name="file">
+        <div id="file-list"></div>
+    </div>
+    
+    <button id="upload-btn" type="button" onclick="uploadFiles()" style="width: 100%;">Transcribe</button>
+</form>
+
+<div id="login_request"></div>
+
+
+<div class="result script" style="  font-size: 25px;
+                                    overflow: wrap;">
+<div class="copy hide" id="myPreTag" >
+    <svg style="float: right;" xmlns="http://www.w3.org/2000/svg" height="25" width="22" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M208 0H332.1c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9V336c0 26.5-21.5 48-48 48H208c-26.5 0-48-21.5-48-48V48c0-26.5 21.5-48 48-48zM48 128h80v64H64V448H256V416h64v48c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V176c0-26.5 21.5-48 48-48z"/></svg>
+</div>
+
+<div class="transcript" id="transcript">
+    Transcription in process please wait...
+</div>
+</div>
+
+<script>
+    document.getElementById('myPreTag').addEventListener('click', function() {
+        // Select the text inside the <pre> tag
+        var textToCopy = document.getElementById("transcript").innerText;
+
+        // Create a temporary textarea element
+        var textarea = document.createElement('textarea');
+        textarea.value = textToCopy;
+        document.body.appendChild(textarea);
+
+        // Select the text in the textarea
+        textarea.select();
+
+        // Copy the selected text to the clipboard
+        document.execCommand('copy');
+        
+        // Remove the temporary textarea
+        document.body.removeChild(textarea);
+        
+        // Optionally, provide some visual feedback (e.g., alert or console.log)
+        console.log('Text copied: ' + textToCopy)
+    }).then(()=>{
+        alert('Text copied: ' + textToCopy)
+    })
+    
+</script>
+
+
+</div>
+
+<script>
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+
+    // Handle dropped files
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function highlight() {
+        dropArea.classList.add('highlight');
+    }
+
+    function unhighlight() {
+        dropArea.classList.remove('highlight');
+    }
+
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        unhighlight();
+
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length === 1 && isAudioFile(files[0])) {
+            const file = files[0];
+            fileInput.files = [file];
+            document.querySelector("#file-list").innerText = file.name;
+        } else {
+            fileList.innerHTML = '<p>Please select a single audio file</p>';
+        }
+    }
+
+    function isAudioFile(file) {
+        return file.type.startsWith('audio/');
+    }
+
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            fileList.innerHTML = ''; // Clear previous file list
+
+            const file = files[0]; // Take only the first file
+
+            const listItem = document.createElement('div');
+            listItem.textContent = file.name;
+            fileList.appendChild(listItem);
+
+            // Set the file input's files property to the selected file
+            fileInput.files = [file]; // Create an array with the selected file
+        } else {
+            fileList.innerHTML = '<p>No file selected</p>';
+        }
+    }
+
+    
+    function uploadFiles() {
+        const form = document.getElementById('upload-form');
+        const formData = new FormData(form);
+
+        const showResult = document.querySelector(".result")
+        const showCopy = document.querySelector(".hide")
+        const result = document.querySelector(".transcript")
+        showResult.classList.remove("result")
+        showCopy.classList.remove("hide")
+
+        fetch('/transcribe/', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then( data => {
+            console.log(data);
+            console.log(data.transcription);
+            result.innerHTML = data.transcription
+            document.getElementById("login_request").innerHTML = `<h4>Your script is not saved, login to save your transcriptions so you can get them later</h4>`
+
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
+{% endblock main %}

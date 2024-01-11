@@ -1,0 +1,172 @@
+body, h1, h2, h3, p, ul, li {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+}
+
+#wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+nav {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+}
+
+h2 {
+    margin-top: 20px;
+}
+
+#drop-area {
+    border: 3px dashed #000000;
+    border-radius: .5rem;
+    padding: 20px;
+    cursor: pointer;
+    height: 200px;
+    display: grid;
+    place-items: center;
+    background-color: rgb(210, 210, 210);
+}
+
+#file-input {
+    display: none;
+}
+
+#file-label {
+    height: 100%;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#file-list {
+    margin-top: 10px;
+}
+
+#upload-btn {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+}
+
+.script {
+    font-size: 25px;
+    overflow-x: wrap;
+    background-color: rgb(210, 210, 210);
+    border: 3px solid #000000;
+    border-radius: .5rem;
+    padding: 20px;
+    margin-top: 20px;
+}
+.result , .hide {
+    display: none;
+}
+
+#login_request {
+    color: red;
+    margin-top: 10px;
+}
+
+
+
+.copy {
+    width: 100%;
+    float: right;
+}
+.copy:hover{
+    background-color: grey;
+    cursor: pointer;
+}
+
+.highlight {
+    border-color: #5cb85c;
+    background-color: #f8f8f8;
+}
+
+.container-fluid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.container-fluid h5 {
+    margin: 0;
+}
+
+.container-fluid ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.container-fluid ul a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+}
+
+.container-fluid ul a:hover {
+    text-decoration: underline;
+}
+
+.container-fluid ul a:visited {
+    color: white;
+}
+
+.container-fluid ul:last-child {
+    margin-left: auto;
+}
+
+.container-fluid h5 a {
+    color: white;
+    text-decoration: none;
+}
+
+.container-fluid h5 a:hover {
+    text-decoration: none;
+}
+
+/* Responsive Styles */
+@media only screen and (max-width: 600px) {
+    #wrapper {
+        padding: 10px;
+    }
+
+    nav {
+        /* flex-direction: column; */
+        align-items: flex-start;
+    }
+
+    nav a {
+        margin: 5px 0;
+    }
+
+    .container-fluid {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .container-fluid ul:last-child {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
